@@ -1,0 +1,52 @@
+[
+  {
+    "id": 1,
+    "title": "Trace Customer Feedback Analysis",
+    "code": "import weave\nfrom openai import OpenAI\nimport json\nimport os\n\n# Get the API key from the environment variable\napi_key = os.getenv(\"OPENAI_API_KEY\")\nif not api_key:\n    raise ValueError(\"API key not found. Please set the OPENAI_API_KEY environment variable.\")\n\n# Initialize Weave\nweave.init('customer-feedback-analysis')\n\nclient = OpenAI(api_key=api_key)\n\n@weave.type()\ndef analyze_sentiment(feedback: str) -> dict:\n    response = client.chat.completions.create(\n        model=\"gpt-4o\",\n        messages=[\n            {\"role\": \"system\", \"content\": \"Analyze the sentiment of the following user feedback and output as JSON.\"},\n            {\"role\": \"user\", \"content\": feedback}\n        ],\n        response_format={\"type\": \"json_object\"}\n    )\n    return json.loads(response.choices[0].message.content)\n\n@weave.type()\ndef extract_key_phrases(feedback: str) -> list:\n    response = client.chat.completions.create(\n        model=\"gpt-4o\",\n        messages=[\n            {\"role\": \"system\", \"content\": \"Extract key phrases from the following user feedback and provide the output in JSON format.\"},\n            {\"role\": \"user\", \"content\": feedback}\n        ],\n        response_format={\"type\": \"json_object\"}\n    )\n    return json.loads(response.choices[0].message.content)['key_phrases']\n\n# Example feedback to be processed\nfeedback = \"The new update is great, but there are some bugs that cause delays when loading reports.\"\n\n# Weave tracing will automatically capture and log the input & output data\nsentiment_result = analyze_sentiment(feedback)\nkey_phrases_result = extract_key_phrases(feedback)\n\nprint(\"Sentiment Analysis Result:\", sentiment_result)\nprint(\"Key Phrases Extracted:\", key_phrases_result)"
+  },   
+  {
+    "id": 2,
+    "title": "Trace a Recursive Function",
+    "code": "import wandb\n\ndef factorial(n):\n    with wandb.trace('factorial') as trace:\n        trace.add('input', n)\n        if n == 1:\n            return 1\n        result = n * factorial(n-1)\n        trace.add('result', result)\n        return result\n\nwandb.init(project='trace_project')\nresult = factorial(5)\nwandb.log({'result': result})"
+  },
+  {
+    "id": 3,
+    "title": "Trace with Context Manager",
+    "code": "import wandb\n\ndef process_data(data):\n    with wandb.trace('process_data') as trace:\n        processed = [x * 2 for x in data]\n        trace.add('processed_data', processed)\n        return processed\n\nwandb.init(project='trace_project')\ndata = range(10)\nresult = process_data(list(data))\nwandb.log({'processed_data': result})"
+  },
+  {
+    "id": 4,
+    "title": "Trace a Loop",
+    "code": "import wandb\n\ndef loop_operations(items):\n    results = []\n    for item in items:\n        with wandb.trace('loop_operation') as trace:\n            processed = item + 10\n            trace.add('item_processed', processed)\n            results.append(processed)\n    return results\n\nwandb.init(project='trace_project')\nresults = loop_operations([1, 2, 3, 4, 5])\nwandb.log({'results': results})"
+  },
+  {
+    "id": 5,
+    "title": "Trace Exception Handling",
+    "code": "import wandb\n\ndef risky_operation(x):\n    with wandb.trace('risky_operation') as trace:\n        trace.add('input', x)\n        try:\n            result = 10 / x\n        except ZeroDivisionError:\n            trace.add('error', 'division by zero')\n            result = None\n        return result\n\nwandb.init(project='trace_project')\nresult = risky_operation(0)\nwandb.log({'result': result})"
+  },
+  {
+    "id": 6,
+    "title": "Trace Model Training Loop",
+    "code": "import wandb\nimport tensorflow as tf\n\ndef train_model(model, data):\n    with wandb.trace('training_loop'):\n        for epoch in range(5):\n            loss = model.train_on_batch(data['x'], data['y'])\n            wandb.log({'epoch': epoch, 'loss': loss})\n\nwandb.init(project='trace_project')\nmodel = tf.keras.models.Sequential([tf.keras.layers.Dense(1)])\ntrain_model(model, {'x': [[1], [2], [3]], 'y': [[2], [4], [6]]})"
+  },
+  {
+    "id": 7,
+    "title": "Trace a Machine Learning Prediction",
+    "code": "import wandb\nimport sklearn.ensemble\nimport sklearn.datasets\nimport sklearn.model_selection\n\nX, y = sklearn.datasets.load_iris(return_X_y=True)\nX_train, X_test, y_train, y_test = sklearn.model_selection.train_test_split(X, y)\nmodel = sklearn.ensemble.RandomForestClassifier()\nmodel.fit(X_train, y_train)\n\ndef predict(input_features):\n    with wandb.trace('prediction') as trace:\n        prediction = model.predict([input_features])\n        trace.add('prediction', prediction)\n        return prediction\n\nwandb.init(project='trace_project')\npred = predict(X_test[0])\nwandb.log({'prediction': pred})"
+  },
+  {
+    "id": 8,
+    "title": "Trace API Request Handling",
+    "code": "import wandb\nimport requests\n\ndef handle_request(url):\n    with wandb.trace('api_request') as trace:\n        response = requests.get(url)\n        trace.add('status_code', response.status_code)\n        trace.add('response_body', response.text)\n        return response\n\nwandb.init(project='trace_project')\nresponse = handle_request('https://api.github.com')\nwandb.log({'response_status': response.status_code})"
+  },
+  {
+    "id": 9,
+    "title": "Trace Data Preprocessing",
+    "code": "import wandb\nimport pandas as pd\n\ndef preprocess_data(dataframe):\n    with wandb.trace('preprocessing_data') as trace:\n        cleaned_data = dataframe.dropna()\n        trace.add('cleaned_data', cleaned_data.shape[0])\n        return cleaned_data\n\nwandb.init(project='trace_project')\ndf = pd.DataFrame({'A': [1, None, 3], 'B': [4, 5, 6]})\nprocessed_df = preprocess_data(df)\nwandb.log({'processed_rows': processed_df.shape[0]})"
+  },
+  {
+    "id": 10,
+    "title": "Trace Data Visualization",
+    "code": "import wandb\nimport matplotlib.pyplot as plt\nimport numpy as np\n\ndef plot_data(data):\n    with wandb.trace('plotting_data') as trace:\n        plt.figure()\n        plt.hist(data)\n        plt.title('Data Distribution')\n        trace.add('plot', plt)\n        plt.close()\n\nwandb.init(project='trace_project')\ndata = np.random.normal(size=100)\nplot_data(data)\nwandb.log({'plot': wandb.Image(plt)})"
+  }
+]

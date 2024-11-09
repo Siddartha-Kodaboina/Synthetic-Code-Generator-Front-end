@@ -1,0 +1,28 @@
+.example-selector {
+  background-color: #f8f9fa;
+  padding: 15px;
+  border-radius: 8px;
+  width: 20%;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+  margin-right: 10px;
+}
+
+.example-item {
+  cursor: pointer;
+  padding: 10px;
+  margin: 5px 0;
+  background-color: #e9ecef;
+  border-radius: 5px;
+  transition: background-color 0.2s;
+}
+
+.example-item:hover {
+  background-color: #ced4da;
+}
+
+/* New active class for highlighting */
+.example-item.active {
+  background-color: #007bff;
+  color: #ffffff;
+  font-weight: bold;
+}
